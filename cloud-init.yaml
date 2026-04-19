@@ -18,3 +18,8 @@ package_upgrade: true
 
 packages:
   - nvtop
+
+runcmd:
+  - mkdir -p /opt/bin
+  - curl -fsSL -o /opt/bin/pixi https://github.com/prefix-dev/pixi/releases/download/v0.67.0/pixi-x86_64-unknown-linux-musl
+  - chmod +x /opt/bin/pixi
