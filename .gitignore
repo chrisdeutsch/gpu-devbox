@@ -1,0 +1,27 @@
+# Terraform state
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
+.terraform.tfstate.lock.info
+crash.log
+
+# Terraform plans and vars (may contain secrets)
+*.tfplan
+*.tfvars
+*.auto.tfvars
+
+# Terraform override files (local customisations)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Environment / credentials
+.env
+.envrc
+
+# Claude Code
+.claude/
+
+# Misc
+TUTORIAL.md

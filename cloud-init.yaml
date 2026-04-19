@@ -1,0 +1,20 @@
+#cloud-config
+
+users:
+  - name: chris
+    groups: [sudo]
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOg1rjCzbqTIH85QQOBgrB8Q+saUlKh1s46wOwh5XGKw chris@x1
+
+write_files:
+  - path: /etc/profile.d/opt-bin.sh
+    content: |
+      export PATH="/opt/bin:$PATH"
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - nvtop
