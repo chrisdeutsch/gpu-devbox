@@ -1,41 +1,64 @@
 terraform {
   required_providers {
-    scaleway = {
-      source  = "scaleway/scaleway"
-      version = "~> 2.73"
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
     }
   }
   required_version = "~> 1.11"
 }
 
-provider "scaleway" {}
+provider "aws" {
+  profile = "personal"
+  region  = "eu-central-1"
+}
 
-resource "scaleway_instance_ip" "public_ip" {}
+data "aws_ami" "gpu" {
+  most_recent = true
+  owners      = ["898082745236"] # Amazon Deep Learning AMI
 
-resource "scaleway_instance_security_group" "ssh" {
-  name                    = "gpu-devbox-ssh"
-  inbound_default_policy  = "drop"
-  outbound_default_policy = "accept"
+  filter {
+    name   = "name"
+    values = ["Deep Learning Base OSS Nvidia Driver GPU AMI (Ubuntu 24.04)*"]
+  }
 
-  inbound_rule {
-    action   = "accept"
-    port     = 22
-    ip_range = var.my_ip
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
   }
 }
 
-resource "scaleway_instance_server" "main" {
-  name              = "main"
-  type              = "L4-1-24G"
-  image             = "ubuntu_noble_gpu_os_13_nvidia"
-  ip_id             = scaleway_instance_ip.public_ip.id
-  security_group_id = scaleway_instance_security_group.ssh.id
+resource "aws_security_group" "ssh" {
+  name        = "gpu-devbox-ssh"
+  description = "SSH from my IP only"
 
-  root_volume {
-    size_in_gb = 150
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.my_ip]
   }
 
-  user_data = {
-    cloud-init = file("${path.module}/cloud-init.yaml")
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_instance" "main" {
+  ami                    = data.aws_ami.gpu.id
+  instance_type          = "g6.xlarge"
+  vpc_security_group_ids = [aws_security_group.ssh.id]
+  user_data              = file("${path.module}/cloud-init.yaml")
+
+  root_block_device {
+    volume_size = 150
+    volume_type = "gp3"
+  }
+
+  tags = {
+    Name = "gpu-devbox"
   }
 }

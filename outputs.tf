@@ -1,3 +1,3 @@
 output "public_ip" {
-  value = scaleway_instance_ip.public_ip.address
+  value = aws_instance.main.public_ip
 }

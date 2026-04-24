@@ -1,11 +1,10 @@
 # gpu-devbox
 
-Terraform configuration for spinning up a GPU instance on Scaleway.
+Terraform configuration for spinning up a GPU instance on AWS.
 
 ## What it creates
 
-- An L4-1-24G GPU instance (Ubuntu Noble GPU OS 13, Nvidia)
-- A public IP
+- A `g6.xlarge` GPU instance (NVIDIA L4, 24GB) in `eu-central-1` using the AWS Deep Learning Base GPU AMI (Ubuntu 24.04)
 - A security group allowing SSH from your IP only
 - A cloud-init config that:
   - Creates a `chris` user with passwordless sudo and your SSH key
@@ -15,7 +14,7 @@ Terraform configuration for spinning up a GPU instance on Scaleway.
 ## Prerequisites
 
 - [Terraform](https://developer.hashicorp.com/terraform/install) ~> 1.11
-- [Scaleway CLI](https://github.com/scaleway/scaleway-cli) configured with your credentials
+- AWS CLI with the `personal` profile configured (SSO login: `aws sso login --profile personal`)
 
 ## Usage
 
@@ -47,10 +46,10 @@ Terraform configuration for spinning up a GPU instance on Scaleway.
 
 ## Stopping the instance
 
-To stop billing, archive the instance via the Scaleway CLI (do not just `poweroff` from inside — that leaves it in standby and billing continues):
+To stop billing on compute (EBS storage still accrues), stop the instance:
 
 ```sh
-scw instance server stop <server-id> zone=fr-par-2
+aws ec2 stop-instances --profile personal --instance-ids <id>
 ```
 
 To destroy all resources:
