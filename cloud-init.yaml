@@ -22,5 +22,13 @@ packages:
 
 runcmd:
   - mkdir -p /opt/bin
-  - curl -fsSL -o /opt/bin/pixi https://github.com/prefix-dev/pixi/releases/download/v0.67.0/pixi-x86_64-unknown-linux-musl
-  - chmod +x /opt/bin/pixi
+  - |
+      set -eu
+      pixi_version="v0.67.0"
+      pixi_asset="pixi-x86_64-unknown-linux-musl"
+      pixi_sha256="512840ad178a65ec7d55001de2a15cbd9c622402901d48eeac6834855c7fb8fe"
+      cd /tmp
+      curl -fsSL -o "${pixi_asset}" "https://github.com/prefix-dev/pixi/releases/download/${pixi_version}/${pixi_asset}"
+      echo "${pixi_sha256}  ${pixi_asset}" | sha256sum -c -
+      install -m 0755 "${pixi_asset}" /opt/bin/pixi
+      rm -f "${pixi_asset}"
